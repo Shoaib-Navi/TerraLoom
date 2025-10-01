@@ -6,6 +6,7 @@ const express = require("express");
 const app = express();
 const helmet = require("helmet")
 app.use(helmet());
+const port = process.env.PORT || 4000 
 
 // If you want to allow fonts/scripts specifically:
 app.use(
@@ -116,6 +117,6 @@ app.use((err, req, res, next) => {
   res.status(statusCode).render("./listings/error.ejs", { message });
 });
 
-app.listen(8080, () => {
+app.listen(port, () => {
   console.log("server is running on port :::8080:::");
 });
