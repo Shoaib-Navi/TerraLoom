@@ -4,6 +4,22 @@ if(process.env.NODE_ENV != "production"){
 
 const express = require("express");
 const app = express();
+const helmet = require("helmet")
+app.use(helmet());
+
+// If you want to allow fonts/scripts specifically:
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "https:", "'unsafe-inline'"],
+      scriptSrc: ["'self'", "https:", "'unsafe-inline'"],
+      fontSrc: ["'self'", "https:", "data:"],
+      imgSrc: ["'self'", "https:", "data:"],
+    },
+  })
+);
+
 const mongoose = require("mongoose");
 const path = require("path");
 const methodOverride = require("method-override");
@@ -15,12 +31,9 @@ const flash = require("connect-flash")
 const passport = require("passport")
 const LocalStrategy = require("passport-local")
 const User = require("./models/user.js");
-
 const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
-
-
 
 // const mongo_url = "mongodb://127.0.0.1:27017/TerraLoom";
 const dbUrl = process.env.ATLASDB_URL;
@@ -87,37 +100,10 @@ app.use((req,res,next)=>{
   next();
 })
 
-// app.get("/demouser",async(req,res)=>{
-//   let fakeUser = new User({
-//     email:"student@gmail.com",
-//     username:"delta-student"
-//   })
-//   let registeredUser = await User.register(fakeUser,"helloworld")
-//   res.send(registeredUser)
-// })
-
 app.use("/listings",listingRouter);
-
-
 app.use("/listings/:id/reviews",reviewRouter);
 app.use("/",userRouter);
 
-
-
-
-
-// app.get("/testListing", async(req,res)=>{
-//     let sampleListing = new Listing({
-//         title:"My New Villa",
-//         description:"By the Beach",
-//         price:1200,
-//         location:"calungute , Goa",
-//         country:"India"
-//     })
-//     await sampleListing.save();
-//     console.log("Sample was saved")
-//     res.send("Successful testing")
-// })
 
 ////older version(*)
 app.all("/:something", (req, res, next) => {
@@ -129,12 +115,6 @@ app.use((err, req, res, next) => {
   let { statusCode = 500, message = "Oh No, Something Went Wrong!" } = err;
   res.status(statusCode).render("./listings/error.ejs", { message });
 });
-
-//// for debugging
-// app.use((err, req, res, next) => {
-//     console.error("ERROR 💥", err);
-//     next(err);
-// });
 
 app.listen(8080, () => {
   console.log("server is running on port :::8080:::");
